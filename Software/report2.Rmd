@@ -1,0 +1,3176 @@
+
+
+# Report o mereni INV-FLOW na vrtu: `r nazev_vrt()`
+
+Mereni probehlo dne: `r datum_mer()`.
+&nbsp;
+
+
+
+```{r , echo=FALSE, comment = NA, warning = FALSE, fig.width = 23, fig.height = 20}
+
+library(grid)
+library(gridExtra)
+library(gtable)
+
+
+ value <- c( vyska_chranicky_mereny_vrt(), vyska_chranicky_pozorovaci_vrt_1(), (hloubka_vrtu() - input$vyska_chranicky_mer_vrt),  (hloubka_pozorovaciho_vrtu_1() - input$vyska_chranicky_poz_vrt_1), hladina_pred_merenim(), hladina_pred_merenim_poz1(), (umisteni_horni_pakr() - input$vyska_chranicky_mer_vrt), vzdal_pakru())
+ 
+ 
+ value2 <- c(vzdal_pozorovaci_vrt_1(),  polomer_vrt_1(), polomer_obsyp(), hydraulicka_vodivost(), dodat_odpory(), input$k_obsyp, ko_vypoctene())
+ 
+ value2 = round(value2, 3)
+   value2[4] = format(hydraulicka_vodivost(), scientific=TRUE)
+ value2[6] = format(input$k_obsyp, scientific=TRUE)
+ value2[7] = format( ko_vypoctene(), scientific=TRUE)
+ 
+      units <- c("[m]", "[m]",  "[m]", "[m]", "[m]", "[m]", "[m]", "[m]")
+      
+      
+      units2 <- c( "[m]", "[m]", "[m]",  "[m/s]", "[-]", "[m/s]", "[m/s]")
+      
+     
+       names <- c( "Vyska chranicky OBvrt", "Vyska chranicky OBpv1",   "Hloubka mereneho vrtu Hvrt", "Hloubka poz. vrtu Hpv1","Hladina pred merenim hv", "Hladina pred mer. hpv1", "Umisteni horniho pakru - 1. pozice", "Vzdalenost pakru L2")
+      
+    names2 <- c("Vzdalenost poz. vrtu Rpv1", "Polomer vrtu rv", "Polomer obsypu ro",  "Hydraulicka vodivost zvodne", "Dodatecne odpory", " K obsyp - projekt", "K obsyp - vypoctene") 
+       
+
+      table = data.frame(Hodnota = value, Jednotky = units)
+      row.names(table) <- names
+      
+     
+      table2 = data.frame(Hodnota = value2, Jednotky = units2)
+      row.names(table) <- names
+      
+      title <- textGrob("Tabulka 1. - Vstupni parametry",gp=gpar(fontsize=23))
+      title2 <- textGrob("Tabulka 2. - Vstupni parametry",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t1 <- tableGrob(table, rows = names, theme =  tt3)
+t2 <- tableGrob(table2, rows = names2, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+
+table <- gtable_add_rows(
+     t1, 
+     heights = grobHeight(title) + padding,
+     pos = 0)
+
+
+table <- gtable_add_grob(
+    table, 
+    title, 
+    1, 1, 1, ncol(table))
+
+
+table2 <- gtable_add_rows(
+     t2, 
+     heights = grobHeight(title) + padding,
+     pos = 0)
+
+
+table2 <- gtable_add_grob(
+    table2, 
+    title2, 
+    1, 1, 1, ncol(table),clip = "on")
+
+
+
+
+
+
+        data_plot = data.frame(vrt_x_l = c(0.5, 0.5), vrt_y_l = c(0,5.1),  vrt_x_r = c(0.6,0.6),
+                               vrt_y_r = c(0, 5.1), osa_vrt_x = c(0.55, 0.55), osa_vrt_y = c(-0.1, 5.2),
+                               podlozi_x = c(0.1, 0.9), podlozi_y = c(0,0), pakr_1_x = 0.55, pakr_1_y = 3.4,
+                               pakr_2_x = 0.55, pakr_2_y = 2, obsyp_1_x = c(0.45, 0.45), obsyp_1_y = c(0,5),
+                               obsyp_2_x = c(0.65, 0.65), obsyp_2_y = c(0,5), teren_x = c(0.1, 0.9), teren_y = c(5, 5),
+                               hladina_x = c(0.1, 0.9), hladina_y = c(4.3, 4.3))
+        
+        
+        myarrow = arrow(angle = 15, ends = "both", type = "closed")
+        one_end_arrow = arrow(angle = 15, ends = "first", type = "closed")
+        one_end_arrow2 = arrow(angle = 15, ends = "last", type = "closed")
+        arrow = arrow(angle=6, type = "closed")
+        
+        
+      
+            
+table4 =   ggplot(data = data_plot) +
+                
+                ### nadpis
+                
+                # input$nazev_vrtu
+                
+                labs(title = p) +
+                
+                
+                annotate("rect", xmin=c(0.5, 0.5), xmax=c(0.6, 0.6), ymin=c(0.07, 0.07) , ymax=c(4.968, 4.968), alpha=0.2, color="grey", fill="grey")  +
+                
+                annotate("rect", xmin=c(0.45, 0.45), xmax=c(0.65, 0.65), ymin=c(0.07, 0.07) , ymax=c(4.968, 4.968), alpha=0.2, color="grey", fill="darkgrey")  +
+                
+                
+                ### vrt
+                geom_line(aes(x = vrt_x_l, y = vrt_y_l), lwd = 2.5, linetype = "dotted", color = "black") +
+                geom_line(aes(x = vrt_x_r, y = vrt_y_r), lwd = 2.5, linetype = "dotted") +
+                geom_line(aes(x = osa_vrt_x, y= osa_vrt_y), lwd = 0.9, linetype = "dotdash") +
+                
+                
+                ### pozorovaci vrt  1
+                #    geom_line(aes(x = 0.62, y = c(1.9, 5.1)), lwd = 1, linetype = "solid") +
+                #   geom_line(aes(x = 0.63, y = c(1.9, 5.1)), lwd = 1, linetype = "solid") +
+                #  geom_line(aes(x = 0.625, y = c(1.85, 5.15)), lwd = 0.7, linetype = "dotdash") +
+                # geom_line(aes(x = c(0.62, 0.63), y = c(1.9, 1.9)), lwd = 0.7, linetype = "solid") +
+                #geom_text(aes(x = 0.635, y = 5.24), label = "Pv1", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### pozorovaci vrt  2
+            geom_line(aes(x = 0.7, y = c(1.9, 5.1)), lwd = 1, linetype = "solid") +
+                geom_line(aes(x = 0.71, y = c(1.9, 5.1)), lwd = 1, linetype = "solid") +
+                geom_line(aes(x = 0.45, y = c(1.85, 5.15)), lwd = 0.7, linetype = "dotdash") +
+                geom_line(aes(x = c(0.7, 0.71), y = c(1.9, 1.9)), lwd = 0.7, linetype = "solid") +
+                geom_text(aes(x = 0.715, y = 5.24), label = "Pv1", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### podlozi
+                geom_line(aes(x=podlozi_x, y= podlozi_y), lwd = 4, linetype = "solid") +
+                
+                
+                ### pakr
+                #  shape = 21, colour = "black", fill = "white", size = 5, stroke = 5
+                geom_point(aes(x = pakr_1_x, y = pakr_1_y), shape = 21, lwd = 73.8, colour = "black", fill = 'snow4', stroke = 0.61) +
+                geom_point(aes(x = pakr_2_x, y = pakr_2_y), shape = 21, lwd = 73.8, colour = "black", fill = 'snow4', stroke = 0.61) +
+                
+                
+                ### obsyp
+                geom_line(aes(x = obsyp_1_x, y = obsyp_1_y), lwd = 1.1, linetype = "solid") +
+                geom_line(aes(x = obsyp_2_x, y = obsyp_2_y), lwd = 1.1, linetype = "solid") +
+                
+                
+                ### teren
+                geom_line(aes(x = teren_x, y = teren_y), lwd = 2, linetype = "solid") +
+                
+                
+                ### hladina
+                geom_line(aes(x = c(0.1, 0.37), y = c(4.3, 4.3)), lwd = 1.3, linetype = "solid", color = "dodgerblue") +
+                geom_line(aes(x = c(0.37, 0.5), y = c(4.3, 4.15)), lwd = 1.3, linetype = "solid", color = "dodgerblue") +
+                geom_line(aes(x = c(0.5, 0.6), y = c(4.15, 4.15)), lwd = 1.3, linetype = "solid", color = "dodgerblue") +
+                geom_line(aes(x = c(0.6, 0.73), y = c(4.15, 4.3)), lwd = 1.3, linetype = "solid", color = "dodgerblue") +
+                geom_line(aes(x = c(0.73, 0.9), y = c(4.3, 4.3)), lwd = 1.3, linetype = "solid", color = "dodgerblue") +
+                
+                
+                
+                ################ popisky ############
+            
+            #### polomer vrtu
+            geom_line(aes(x = c(0.2, 0.55), y = 4.7),arrow = myarrow, color = "dimgray") +
+                geom_line(aes(x = c(0.39, 0.55), y = 4.7),color = "dimgray") +
+                geom_text(aes(x = 0.39, y = 4.85), label = paste("rv =", polomer_vrt_1(), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                #### polomer obsypu
+                geom_line(aes(x = c(0.45, 0.55), y = 4.4),arrow = myarrow, color = "dimgray") +
+                geom_line(aes(x = c(0.39, 0.55), y = 4.4), color = "dimgray") +
+                geom_text(aes(x = 0.39, y = 4.55), label = paste("ro =", polomer_obsyp(), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                #### celkova vyska
+                geom_line(aes(x = 0.21, y = c(0, 4.3)), arrow = myarrow, color = "dimgray") +
+                geom_text(aes(x = 0.26, y = 2.5), label = paste("Hzv =", (hloubka_zvodneni()), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                #### uroven hladiny
+                geom_line(aes(x = 0.21, y = c(4.3, 5)), arrow = myarrow, color = "dimgray") +
+                geom_text(aes(x = 0.27, y = 4.68), label = paste("hv(0) =", (input$hladina_pred_mer_vrt - input$vyska_chranicky_mer_vrt), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                #### H vtr
+                geom_line(aes(x = c(0.1, 0.1), y = c(0, 5)), arrow = myarrow, color = "dimgray") +
+                geom_text(aes(x = 0.155, y = 2.9), label = paste("H vrt =", (hloubka_vrtu() - input$vyska_chranicky_mer_vrt), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                #### hv
+                geom_line(aes(x = 0.32, y = c(0, 4.15)), arrow = myarrow, color = "dimgray") +
+                geom_line(aes(x = c(0.315,0.5), y = 4.15), linetype = "solid", color = "dimgray") +
+                geom_text(aes(x = 0.332, y = 1.7), label = "hv", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                #### vzdalenost pakru
+                geom_line(aes(x = c(0.34, 0.34), y = c(3.4, 5)), arrow = myarrow, color = "dimgray") +
+                geom_line(aes(x = c(0.34, 0.34), y = c(2, 3.4)), arrow = myarrow, color = "dimgray") +
+                geom_line(aes(x = c(0.33, 0.515), y = 2),  linetype = "solid", color = "dimgray") +
+                geom_line(aes(x = c(0.33, 0.515), y = 3.4),  linetype = "solid", color = "dimgray") +
+                geom_text(aes(x = 0.384, y = 3.93), label = paste("L1 =", (umisteni_horni_pakr() - input$vyska_chranicky_mer_vrt), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                geom_text(aes(x = 0.388, y = 2.7), label = paste("L2 =", vzdal_pakru(), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### pakr nazev
+                geom_text(aes(x = pakr_1_x, y = pakr_1_y), label = "pakr 1", lwd = 5.4, color = "black" ) +
+                geom_text(aes(x = pakr_2_x, y = pakr_2_y), label = "pakr 2", lwd = 5.4, color = "black" ) +
+                
+                
+                ### hydraulicka vodivost
+                geom_text(aes(x = 0.82, y = 3.0), label = paste("K =", hydraulicka_vodivost(), "[m/s]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### hydraulicka vodivost obsypu
+                geom_point(aes(x = 0.475, 1.0 ), color = "dimgray") +
+                geom_line(aes(x = c(0.43, 0.475), y = c(0.83, 1.0)), color = "dimgray") +
+                geom_line(aes(x = c(0.335, 0.43), y = c(0.83, 0.83)), color = "dimgray") +
+                geom_text(aes(x = 0.38, y = 0.95), label = paste("Ko =", input$k_obsyp, "[m/s]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### qin
+                geom_line(aes(x = c( 0.37 , 0.51), y = 2.95), arrow = one_end_arrow2, color = "dimgray") +
+                geom_text(aes(x = 0.38, y = 3.05), label = "Qin", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                
+                ###rpv1
+                geom_line(aes(x = c(0.45, 0.79), y = c(1.9, 2.2)), arrow = one_end_arrow, color = "dimgray") +
+                geom_line(aes(x = c(0.79, 0.89), y = c(2.2, 2.2)), color = "dimgray") +
+                geom_text(aes(x = 0.84, y = 2.1), label = paste("rpv1 =", polomer_pv1(), "[m]"), lwd = 5.4, color = "dimgray" ) +
+                geom_text(aes(x = 0.843, y = 1.88), label = paste("Rpv1 =", input$vzdal_pozor_v_1, "[m]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### hpv1
+                geom_text(aes(x = 0.852, y = 2.33), label = paste("hpv1 (0) =", (input$hladina_pred_mer_poz1 - input$vyska_chranicky_poz_vrt_1), "[m p. t.]"), lwd = 5.4, color = "dimgray" ) +
+                geom_text(aes(x = 0.857, y = 2.54), label = paste("Hpv1 =", hloubka_poz_vrtu_1_pro_graf(), "[m p. t.]"), lwd = 5.4, color = "dimgray" ) +
+                
+                
+                
+                ###♥ Qp
+                geom_line(aes(x = 0.556, y = c(0.6, 1.8)), arrow = arrow(angle = 15, ends = "last", type = "closed"), color = "dimgray") +
+                geom_text(aes(x = 0.57, y = 1.0), label = "Qp", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ###♥ Qo
+                geom_line(aes(x = 0.47, y = c(1.5, 2.4)), arrow = arrow(angle = 15, ends = "last", type = "closed"), color = "dimgray") +
+                geom_text(aes(x = 0.483, y = 1.8), label = "Qo", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ###♥ Qc
+                geom_line(aes(x = 0.556, y = c(4.6, 5.4)), arrow = arrow(angle = 15, ends = "last", type = "closed"), color = "dimgray") +
+                geom_text(aes(x = 0.573, y = 5.35), label = "Qc", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                ### text teren, hpv, nepropustne podlozi
+                geom_text(aes(x = 0.8, y = 0.17), label = "Nepropustne podlozi", lwd = 5.4,color = "dimgray" ) +
+                geom_text(aes(x = 0.8, y = 4.41), label = "HPV", lwd = 5.4, color = "dimgray" ) +
+                geom_text(aes(x = 0.8, y = 5.13), label = "Teren", lwd = 5.4, color = "dimgray" ) +
+                
+                
+                xlim(0.1, 0.9) +
+                ylim(-0.1, 5.4) +
+                
+                theme(panel.background = element_blank(),
+                      axis.title.x=element_blank(),
+                      axis.text.x=element_blank(),
+                      axis.ticks.x=element_blank(),
+                      axis.title.y=element_blank(),
+                      axis.text.y=element_blank(),
+                      axis.ticks.y=element_blank(),
+                      plot.title = element_text(size=28, hjust=0.5))   +
+                
+                ggtitle(paste("Vrt ",input$nazev_vrtu, " - ", input$datum_mereni))
+        
+        
+    
+        
+     
+
+grid.arrange(
+ table,
+ table2,
+ table4,
+ respect=TRUE,
+ layout_matrix = matrix(c(1,2,3,3),  byrow = TRUE, nrow = 2),
+ widths=c(94, 93), heights=c(51, 105)
+ )
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 17, fig.align ='left', warning = FALSE }
+
+pozic = 0
+
+
+
+if(!is.null(vysledek_vypocet()) && is.null(vysledek_vypocet_dva())  && is.null(vysledek_vypocet_tri())  && is.null(vysledek_vypocet_ctyri())  && is.null(vysledek_vypocet_pet())     && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()) )
+   {pozic = 1}
+   
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && is.null(vysledek_vypocet_tri())  && is.null(vysledek_vypocet_ctyri())  && is.null(vysledek_vypocet_pet())     && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_dva()[1,] == 0) > 2)
+    pozic = 1
+  
+  else
+  pozic = 2
+  }
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && is.null(vysledek_vypocet_ctyri())  && is.null(vysledek_vypocet_pet())     && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_tri()[1,] == 0) > 2)
+    pozic = 2
+  
+  else
+  pozic = 3
+  }
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && is.null(vysledek_vypocet_pet())     && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_ctyri()[1,] == 0) > 2)
+    pozic =3
+  
+  else
+  pozic = 4
+  }
+  
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_pet()[1,] == 0) > 2)
+    pozic = 4
+  
+  else
+  pozic = 5
+  }
+
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     &&   !is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_sest()[1,] == 0) > 2)
+    pozic = 5
+  
+  else
+  pozic = 6
+  }
+
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     && !is.null(vysledek_vypocet_sest())  && !is.null(vysledek_vypocet_sedm())  && is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_sedm()[1,] == 0) > 2)
+    pozic = 6
+  
+  else
+  pozic = 7
+  }
+
+
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     && !is.null(vysledek_vypocet_sest())  && !is.null(vysledek_vypocet_sedm())  && !is.null(vysledek_vypocet_osm())  && is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_osm()[1,] == 0) > 2)
+    pozic = 7
+  
+  else
+  pozic = 8
+  }
+
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     && !is.null(vysledek_vypocet_sest())  && !is.null(vysledek_vypocet_sedm())  && !is.null(vysledek_vypocet_osm())  && !is.null(vysledek_vypocet_sest())  && is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_sest()[1,] == 0) > 2)
+    pozic = 8
+  
+  else
+  pozic = 9
+  }
+
+
+
+
+if(!is.null(vysledek_vypocet()) && !is.null(vysledek_vypocet_dva())  && !is.null(vysledek_vypocet_tri())  && !is.null(vysledek_vypocet_ctyri())  && !is.null(vysledek_vypocet_pet())     && !is.null(vysledek_vypocet_sest())  && !is.null(vysledek_vypocet_sedm())  && !is.null(vysledek_vypocet_osm())  && !is.null(vysledek_vypocet_sest())  && !is.null(vysledek_vypocet_deset()))
+{
+  if(sum(vysledek_vypocet_deset()[1,] == 0) > 2)
+    pozic = 9
+  
+  else
+  pozic = 10
+  }
+
+
+
+```
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 1)
+{
+
+
+  n_row = nrow(vysledek_vypocet())
+  end = nrow(vysledek_vypocet())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 1. ",(umisteni_pakru_1() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet()$Q_celk, Qp = vysledek_vypocet()$q_pakr, Qo = vysledek_vypocet()$q_obt,  qin = vysledek_vypocet()$qin,Qoc =  (1* vysledek_vypocet()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 3. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         
+                                          
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 1)
+{
+
+    if(max() < n_row || min() > 1 ) 
+   {
+      
+  n_row = nrow(vysledek_vypocet())
+ data = vysledek_vypocet()[min():max(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+ 
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 2)
+{
+
+
+  n_row = nrow(vysledek_vypocet_dva())
+  end = nrow(vysledek_vypocet_dva())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 2. ",(umisteni_pakru_2() + vzdal_pakru()) , "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_dva()$Q_celk, Qp = vysledek_vypocet_dva()$q_pakr, Qo = vysledek_vypocet_dva()$q_obt,  qin = vysledek_vypocet_dva()$qin,Qoc =  (1* vysledek_vypocet_dva()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 4. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_dva(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 9, fig.align ='left', warning = FALSE }
+
+if(pozic >= 2)
+{
+  if(max_dva() < n_row || min_dva() > 1 ) 
+   {
+  
+  n_row = nrow(vysledek_vypocet_dva())
+ data = vysledek_vypocet_dva()[min_dva():max_dva(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_dva(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+ 
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 3)
+{
+
+
+  n_row = nrow(vysledek_vypocet_tri())
+  end = nrow(vysledek_vypocet_tri())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 3. ", (umisteni_pakru_3() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_tri()$Q_celk, Qp = vysledek_vypocet_tri()$q_pakr, Qo = vysledek_vypocet_tri()$q_obt,  qin = vysledek_vypocet_tri()$qin,Qoc =  (1* vysledek_vypocet_tri()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 5. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+     formula <- y ~ x
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_tri(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 3)
+{
+
+   if(max_tri() < n_row || min_tri() > 1 ) 
+   {
+  n_row = nrow(vysledek_vypocet_tri())
+ data = vysledek_vypocet_tri()[min_tri():max_tri(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_tri(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+  
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 4)
+{
+
+
+  n_row = nrow(vysledek_vypocet_ctyri())
+  end = nrow(vysledek_vypocet_ctyri())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 4. ", (umisteni_pakru_4() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_ctyri()$Q_celk, Qp = vysledek_vypocet_ctyri()$q_pakr, Qo = vysledek_vypocet_ctyri()$q_obt,  qin = vysledek_vypocet_ctyri()$qin,Qoc =  (1* vysledek_vypocet_ctyri()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 6. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_ctyri(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 4)
+{
+if(max_ctyri() < n_row || min_ctyri() > 1 ) 
+   {
+  
+  n_row = nrow(vysledek_vypocet_ctyri())
+ data = vysledek_vypocet_ctyri()[min_ctyri():max_ctyri(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_ctyri(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+   
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 5)
+{
+
+
+  n_row = nrow(vysledek_vypocet_pet())
+  end = nrow(vysledek_vypocet_pet())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 5. ", (umisteni_pakru_5() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_pet()$Q_celk, Qp = vysledek_vypocet_pet()$q_pakr, Qo = vysledek_vypocet_pet()$q_obt,  qin = vysledek_vypocet_pet()$qin,Qoc =  (1* vysledek_vypocet_pet()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 7. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_pet(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 5)
+{
+
+   if(max_pet() < n_row || min_pet() > 1 ) 
+   {
+  n_row = nrow(vysledek_vypocet_pet())
+ data = vysledek_vypocet_pet()[min_pet():max_pet(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_pet(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+  
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 6)
+{
+
+
+  n_row = nrow(vysledek_vypocet_sest())
+  end = nrow(vysledek_vypocet_sest())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 6. ", (umisteni_pakru_6() + vzdal_pakru()) , "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_sest()$Q_celk, Qp = vysledek_vypocet_sest()$q_pakr, Qo = vysledek_vypocet_sest()$q_obt,  qin = vysledek_vypocet_sest()$qin,Qoc =  (1* vysledek_vypocet_sest()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 8. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+  formula <- y ~ x
+
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_sest(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 6)
+{
+
+  if(max_sest() < n_row || min_sest() > 1 ) 
+   {
+  n_row = nrow(vysledek_vypocet_sest())
+ data = vysledek_vypocet_sest()[min_sest():max_sest(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_sest(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+   
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 7)
+{
+
+
+  n_row = nrow(vysledek_vypocet_sedm())
+  end = nrow(vysledek_vypocet_sedm())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 7. ", (umisteni_pakru_7() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_sedm()$Q_celk, Qp = vysledek_vypocet_sedm()$q_pakr, Qo = vysledek_vypocet_sedm()$q_obt,  qin = vysledek_vypocet_sedm()$qin,Qoc =  (1* vysledek_vypocet_sedm()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 9. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_sedm(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 7)
+{
+
+  if(max_sedm() < n_row || min_sedm() > 1 ) 
+   {
+  
+  n_row = nrow(vysledek_vypocet_sedm())
+ data = vysledek_vypocet_sedm()[min_sedm():max_sedm(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_sedm(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+   
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 8)
+{
+
+
+  n_row = nrow(vysledek_vypocet_osm())
+  end = nrow(vysledek_vypocet_osm())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 8. ", (umisteni_pakru_8() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_osm()$Q_celk, Qp = vysledek_vypocet_osm()$q_pakr, Qo = vysledek_vypocet_osm()$q_obt,  qin = vysledek_vypocet_osm()$qin,Qoc =  (1* vysledek_vypocet_osm()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 10. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_osm(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 8)
+{
+  
+if(max_osm() < n_row || min_osm() > 1 ) 
+   {
+  
+  n_row = nrow(vysledek_vypocet_osm())
+ data = vysledek_vypocet_osm()[min_osm():max_osm(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_osm(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+   
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 9)
+{
+
+
+  n_row = nrow(vysledek_vypocet_devet())
+  end = nrow(vysledek_vypocet_devet())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 9. ", (umisteni_pakru_9() + vzdal_pakru()) , "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_devet()$Q_celk, Qp = vysledek_vypocet_devet()$q_pakr, Qo = vysledek_vypocet_devet()$q_obt,  qin = vysledek_vypocet_devet()$qin,Qoc =  (1* vysledek_vypocet_devet()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 11. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_devet(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 9)
+{
+
+  if(max_devet() < n_row || min_devet() > 1 ) 
+   {
+  n_row = nrow(vysledek_vypocet_devet())
+ data = vysledek_vypocet_devet()[min_devet():max_devet(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_devet(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+   
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 24, fig.height = 9, fig.align ='centre', warning = FALSE }
+
+if(pozic >= 10)
+{
+
+
+  n_row = nrow(vysledek_vypocet_deset())
+  end = nrow(vysledek_vypocet_deset())
+  
+  
+main_title = textGrob(paste0("Pozice mereni INV-FLOW c. 10. ", (umisteni_pakru_10() + vzdal_pakru()), "m.p.t"),gp=gpar(fontsize=23), x = 0, hjust = 0)
+            
+table1 = data.frame(seq(1,end, by = 1) ,Qc = vysledek_vypocet_deset()$Q_celk, Qp = vysledek_vypocet_deset()$q_pakr, Qo = vysledek_vypocet_deset()$q_obt,  qin = vysledek_vypocet_deset()$qin,Qoc =  (1* vysledek_vypocet_deset()$qo_qc))
+              
+
+colnames(table1) = c( "Mereni ", "Qc [l/s]", "Qp [l/s]", "Qo [l/s]",  "Qin [l/s]","Qo/Qc [-]  ")
+      
+  
+title1 <- textGrob("Tabulka 12. - vysledky mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, theme =  tt3, rows = NULL)
+
+padding <- unit(15, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  formula <- y ~ x
+   
+   
+                       graph_cele_1 = ggplot(data = vysledek_vypocet_deset(), aes(x = Q_celk, y = qo_qc)) +
+                         geom_smooth(method = "lm", se=FALSE, color="black", formula = formula) +
+                         stat_poly_eq(formula = formula,
+                                      aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                                      parse = TRUE) +
+                         geom_point() +
+                         xlab("Qc [l/s]") + ylab("Qo / Qc [-]") +
+    ggtitle("Linearni regrese - vsechna mereni") + 
+    theme(plot.title = element_text(size=22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+                         theme(text=element_text(size=20))
+                       
+                       
+      
+                                    
+
+            
+ 
+ grid.arrange(
+ top = main_title,
+ table1,
+ graph_cele_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+ )
+  
+                
+ 
+                       
+}
+
+
+                       
+```
+
+
+
+
+
+
+
+
+
+
+```{r ,  echo=FALSE,comment = NA,  fig.width = 24, fig.height = 8, fig.align ='left', warning = FALSE }
+
+if(pozic >= 10)
+{
+ if(max_deset() < n_row || min_deset() > 1 ) 
+   {
+  
+  n_row = nrow(vysledek_vypocet_deset())
+ data = vysledek_vypocet_deset()[min_deset():max_deset(),]
+
+  formula <- y ~ x
+  
+  graph_zvol_1 =  ggplot(data = vysledek_vypocet_deset(), aes(x = Q_celk, y = qo_qc)) +
+    
+    
+    geom_smooth(data = data, aes(x = Q_celk, y = qo_qc), method = "lm", se=FALSE, color="black", formula = formula) +
+        stat_poly_eq(data = data, formula = formula,
+                     aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")),
+                     parse = TRUE) +
+        geom_point() +
+        xlab("Qc [l/s]") +
+        ylab("Qo / Qc [-]") +
+        geom_point(data = data, aes(x = Q_celk, y = qo_qc), color = "red" )+
+    ggtitle("Linearni regrese - zvolene mereni") + 
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     labs(color='')  +
+     theme(text=element_text(size=20))
+  
+  
+  
+ grid.arrange( 
+ graph_zvol_1,
+ layout_matrix = matrix(c(1,2), nrow = 1)
+  )
+   }
+
+}
+
+```
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 4, fig.height = 6, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 1)
+{    
+  
+table1 = data.frame()
+c_names = c()
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   c_names[i] = i
+    }
+           
+
+colnames(table1) = c_names
+row_n = paste0((umisteni_pakru_1() + vzdal_pakru()), " m. p. t.")
+
+      
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = row_n, theme =  tt3)
+
+padding <- unit(10, "mm")
+
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+vec = rep(NA,7)
+nrow = nrow(vysledek_vypocet())
+
+for(i in 1:7)
+{
+  if(i> nrow)
+vec[i] = NA
+  
+  else
+      vec[i] = vysledek_vypocet()$qo_qc[i]
+  
+}
+vec = 100 * vec
+
+data_graf_v = data.frame(pakr = rep((umisteni_pakru_1() + vzdal_pakru()),7), qo_qc = vec)
+
+
+
+  graph1 = ggplot(data = data_graf_v, aes(x = qo_qc, y = pakr)) +
+                         geom_point() +
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Linearni regrese - vsechna mereni") +
+    theme(plot.title = element_text(size = 22)) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+     theme(text=element_text(size=17)) +
+    scale_y_reverse()
+
+
+
+ grid.arrange(
+ table1,
+ graph1
+ )
+}
+ 
+```
+
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+
+if(pozic == 2)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1() + vzdal_pakru())
+table1[2,1] = ((umisteni_pakru_2() + vzdal_pakru()))
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+  
+ 
+```
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+ 
+
+if(pozic == 2)
+{    
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_line() +
+    geom_line(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_line(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_line(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_line(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_line(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_line(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+
+
+ grid.arrange(
+ graph1
+ )
+
+}
+
+```
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+
+
+if(pozic == 3)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i] 
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1() + vzdal_pakru())
+table1[2,1] = ((umisteni_pakru_2() + vzdal_pakru()) )
+table1[3,1] = ((umisteni_pakru_3() + vzdal_pakru()) )
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+
+```
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 3)
+{   
+
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+
+
+ grid.arrange(
+ graph1
+ )
+
+
+}
+
+```
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+if(pozic == 4)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1() + vzdal_pakru())
+table1[2,1] = ((umisteni_pakru_2() + vzdal_pakru()))
+table1[3,1] = ((umisteni_pakru_3() + vzdal_pakru()))
+table1[4,1] = ((umisteni_pakru_4() + vzdal_pakru()))
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+```
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 4)
+{    
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+
+
+ grid.arrange(
+ graph1
+ )
+
+}
+
+
+```
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+      
+
+if(pozic == 5)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1() + vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+```
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 5)
+{   
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+     
+  
+
+
+ grid.arrange(
+ graph1
+ )
+}
+
+```
+
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+if(pozic == 6)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   table1[6,i] = vysledek_vypocet_sest()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1()+ vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+table1[6,1] = (umisteni_pakru_6() + vzdal_pakru())
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+
+```
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 6)
+{   
+
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+     theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+
+
+ grid.arrange(
+ graph1
+ )
+
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+if(pozic == 7)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   table1[6,i] = vysledek_vypocet_sest()$qo_qc[i]
+   table1[7,i] = vysledek_vypocet_sedm()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1()+ vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+table1[6,1] = (umisteni_pakru_6() + vzdal_pakru())
+table1[7,1] = (umisteni_pakru_7() + vzdal_pakru())
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+
+```
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 7)
+{   
+
+
+
+ graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+     theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+     
+
+
+
+ grid.arrange(
+ graph1
+ )
+
+}
+
+```
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+if(pozic == 8)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   table1[6,i] = vysledek_vypocet_sest()$qo_qc[i]
+   table1[7,i] = vysledek_vypocet_sedm()$qo_qc[i]
+   table1[8,i] = vysledek_vypocet_osm()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1()+ vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+table1[6,1] = (umisteni_pakru_6() + vzdal_pakru())
+table1[7,1] = (umisteni_pakru_7() + vzdal_pakru())
+table1[8,1] = (umisteni_pakru_8() + vzdal_pakru())
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))  
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+```
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 8)
+{    
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw() +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+     theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+     
+  
+  
+
+
+
+
+ grid.arrange(
+ graph1
+ )
+
+}
+
+```
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+if(pozic == 9)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   table1[6,i] = vysledek_vypocet_sest()$qo_qc[i]
+   table1[7,i] = vysledek_vypocet_sedm()$qo_qc[i]
+   table1[8,i] = vysledek_vypocet_osm()$qo_qc[i]
+   table1[9,i] = vysledek_vypocet_sest()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1()+ vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+table1[6,1] = (umisteni_pakru_6() + vzdal_pakru())
+table1[7,1] = (umisteni_pakru_7() + vzdal_pakru())
+table1[8,1] = (umisteni_pakru_8() + vzdal_pakru())
+table1[9,1] = (umisteni_pakru_9() + vzdal_pakru())
+
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=24), x = 0, hjust = 0)
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=24), x = 0, hjust = 0)
+
+tt3 <- ttheme_minimal(base_size = 22,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+
+if(pozic == 9)
+{    
+
+  
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw() +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+  guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+     
+  
+
+
+ grid.arrange(
+  graph1
+ )
+
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r , eval = raw, collapse=TRUE, echo=FALSE,comment = NA, fig.width = 24, fig.height = 6, fig.align ='center', warning = FALSE }
+
+
+if(pozic == 10)
+{    
+
+table1 = data.frame()
+c_names = c()
+
+
+for(i in 1:7)
+    {
+   table1[1,i] = vysledek_vypocet()$qo_qc[i]  
+   table1[2,i] = vysledek_vypocet_dva()$qo_qc[i] 
+   table1[3,i] = vysledek_vypocet_tri()$qo_qc[i]  
+   table1[4,i] = vysledek_vypocet_ctyri()$qo_qc[i]
+   table1[5,i] = vysledek_vypocet_pet()$qo_qc[i]
+   table1[6,i] = vysledek_vypocet_sest()$qo_qc[i]
+   table1[7,i] = vysledek_vypocet_sedm()$qo_qc[i]
+   table1[8,i] = vysledek_vypocet_osm()$qo_qc[i]
+   table1[9,i] = vysledek_vypocet_sest()$qo_qc[i]
+   table1[10,i] = vysledek_vypocet_deset()$qo_qc[i]
+   c_names[1+i] = i
+}
+  
+
+ 
+ 
+ table1 = cbind(t= 0, table1)
+ 
+  
+  table1[1,1] = (umisteni_pakru_1()+ vzdal_pakru())
+table1[2,1] = (umisteni_pakru_2() + vzdal_pakru())
+table1[3,1] = (umisteni_pakru_3() + vzdal_pakru())
+table1[4,1] = (umisteni_pakru_4() + vzdal_pakru())
+table1[5,1] = (umisteni_pakru_5() + vzdal_pakru())
+table1[6,1] = (umisteni_pakru_6() + vzdal_pakru())
+table1[7,1] = (umisteni_pakru_7() + vzdal_pakru())
+table1[8,1] = (umisteni_pakru_8() + vzdal_pakru())
+table1[9,1] = (umisteni_pakru_9() + vzdal_pakru())
+table1[10,1] = (umisteni_pakru_10() + vzdal_pakru())
+
+
+ 
+table2 = table1
+
+c_names[1] = "Pozice mereni [m.p.t.]"
+
+colnames(table1) = c_names
+
+
+  
+title1 <-textGrob("Qo/Qc [-] v zavislosti na poradi mereni",gp=gpar(fontsize=23))
+title_main <- textGrob("Vysledne parametry mereneho profilu",gp=gpar(fontsize=23))
+
+tt3 <- ttheme_minimal(base_size = 20,
+  core=list(bg_params = list(fill = blues9[2:5], col=NA)))
+
+t5 <- tableGrob(table1, rows = NULL, theme =  tt3)
+
+padding <- unit(15, "mm")
+
+
+
+table1 <- gtable_add_rows(
+     t5, 
+     heights = grobHeight(title1) + padding,
+     pos = 0)
+
+
+table1 <- gtable_add_grob(
+    table1, 
+    title1, 
+    1, 1, 1, ncol(table1))    
+
+
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  theme(legend.title=element_blank()) +
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+    
+    theme(plot.title = element_text(size = 7)) +
+     theme(text=element_text(size=7)) 
+  
+  
+
+
+
+
+ grid.arrange(
+ top = title_main,
+ table1
+ )
+
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r , echo=FALSE,comment = NA, fig.width = 9, fig.height = 11, fig.align ='centre', warning = FALSE }
+
+if(pozic == 10)
+{   
+
+  graph1 = ggplot(data = table2, aes(x = V1, y = t, color = "1",  na.rm = TRUE), size=0.9) +
+                         geom_path() +
+    geom_path(aes(x = V2, y = t, color = "2"), size=0.9) +
+    geom_path(aes(x = V3, y = t, color = "3"), size=0.9) +
+    geom_path(aes(x = V4, y = t, color = "4"), size=0.9) +
+    geom_path(aes(x = V5, y = t, color = "5"), size=0.9) +
+    geom_path(aes(x = V6, y = t, color = "6"), size=0.9) +
+    geom_path(aes(x = V7, y = t, color = "7"), size=0.9) +
+    
+                         xlab("Qo/Qc [-]") + ylab("H [m.p.t.]") +
+    ggtitle("Namerene hodnoty INV-FLOW pro cely profil vrtu") +
+ theme_bw()  +
+    
+    scale_y_continuous(trans = "reverse") +
+  
+    theme(legend.position="bottom") +
+  
+  
+    guides(colour = guide_legend(nrow = 1)) +
+    
+    scale_color_manual(name = "",
+                        breaks = c("1", "2", "3", "4", "5", "6", "7"),
+                        values = c("1" = "red", "2" = "blue", "3" = "orange", "4" = "brown", "5" = "black", "6" = "green",       "7" = "purple")) +
+    
+  guides(fill=guide_legend(title="Vykon cerpadla [%]")) +
+    
+    theme(plot.title = element_text(size = 12)) +
+     theme(text=element_text(size=12)) 
+     
+  
+
+
+ grid.arrange(
+  graph1
+ )
+
+}
+
+
+```
